@@ -1,21 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import './App.css';
 
 function App() {
   const [input, setInput] = useState('');
-  const queryClient = useQueryClient();
+
+  const fetchWords = () =>
+    fetch(`https://api.datamuse.com/words?rel_syn=${input}`).then((response) =>
+      response.json()
+    );
+
   const { data: words, isLoading } = useQuery({
     queryKey: ['words', input],
-    queryFn: () => fetchWords(input),
+    queryFn: fetchWords,
     enabled: input.length > 0,
   });
-
-  useEffect(() => {
-    if (input.length > 0) {
-      queryClient.invalidateQueries(['words', input]);
-    }
-  }, [input, queryClient]);
 
   const copyToClipboard = async (text) => {
     try {
@@ -35,9 +34,9 @@ function App() {
       ) : (
         words && (
           <ul>
-            {words.map((word, index) => (
-              <li key={index} onClick={() => copyToClipboard(word.word)}>
-                {word.word}
+            {words.map(({ word }, index) => (
+              <li key={index} onClick={() => copyToClipboard(word)}>
+                {word}
               </li>
             ))}
           </ul>
@@ -52,12 +51,6 @@ function App() {
         </p>
       </footer>
     </div>
-  );
-}
-
-function fetchWords(word) {
-  return fetch(`https://api.datamuse.com/words?rel_syn=${word}`).then(
-    (response) => response.json()
   );
 }
 
