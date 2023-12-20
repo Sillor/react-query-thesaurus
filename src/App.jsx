@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import './App.css';
 
 function App() {
   const [input, setInput] = useState('');
@@ -16,8 +17,18 @@ function App() {
     }
   }, [input, queryClient]);
 
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(`Copied "${text}" to clipboard`);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
-    <>
+    <div className="app-container">
+      <h1>Synonym Finder</h1>
       <input type="text" onChange={(e) => setInput(e.target.value)} />
       {isLoading ? (
         <div>Loading...</div>
@@ -25,12 +36,22 @@ function App() {
         words && (
           <ul>
             {words.map((word, index) => (
-              <li key={index}>{word.word}</li>
+              <li key={index} onClick={() => copyToClipboard(word.word)}>
+                {word.word}
+              </li>
             ))}
           </ul>
         )
       )}
-    </>
+      <footer>
+        <p>
+          By{' '}
+          <a href="https://github.com/Sillor/react-query-thesaurus">
+            Egor Strakhov
+          </a>
+        </p>
+      </footer>
+    </div>
   );
 }
 
